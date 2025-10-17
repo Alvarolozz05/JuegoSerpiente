@@ -706,9 +706,11 @@ public class Serpiente {
         long minutos = (segundos % 3600) / 60;
         long segs = segundos % 60;
 
-        if (horas > 0)
+        if (horas > 0) {
             return String.format("%02d:%02d:%02d", horas, minutos, segs);
-        else
+        }
+        else {
             return String.format("%02d:%02d", minutos, segs);
+        }
     }
 }
