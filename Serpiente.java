@@ -150,6 +150,10 @@ public class Serpiente {
         System.out.print("\033[?25l"); // Ocultar cursor
         System.out.flush();
 
+        long inicio = System.currentTimeMillis(); // Momento en que empieza la partida
+        final long[] tiempoPausado = {0}; // Tiempo total en pausa
+        final long[] pausaInicio = {0}; // Momento en que se pausó
+
         int nivel = 0;
 
         final int ALTO = 15;
@@ -205,6 +209,11 @@ public class Serpiente {
                     jugando[0] = false;
                 } else if (tecla == 'P') {
                     enPausa[0] = !enPausa[0];
+                    if (enPausa[0]) {
+                        pausaInicio[0] = System.currentTimeMillis(); // ✅ ahora sí puedes modificarla
+                    } else {
+                        tiempoPausado[0] += (System.currentTimeMillis() - pausaInicio[0]); // ✅ también esta
+                    }
                 }
             }
         });
@@ -338,6 +347,9 @@ public class Serpiente {
             System.out.print("\033[H\033[2J");
             System.out.flush();
             
+            long tiempoJugado = (System.currentTimeMillis() - inicio - tiempoPausado[0]) / 1000; // Tiempo jugado en segundos
+            String tiempoTexto = formatoTiempo(tiempoJugado);
+
             pintarTablero(matriz);
             System.out.println(
                 "---------------------------------------------------\n" +
@@ -346,6 +358,7 @@ public class Serpiente {
                 "  " + ANSI_YELLOW + "Nivel: " + ANSI_RESET + ANSI_GREEN + nivel + ANSI_RESET +
                 "   |   " + ANSI_YELLOW + "Puntos: " + ANSI_RESET + ANSI_GREEN + puntos + ANSI_RESET +
                 "   |   " + ANSI_YELLOW + "Longitud: " + ANSI_RESET + ANSI_GREEN + longitud + ANSI_RESET + "\n" +
+                "  " + ANSI_YELLOW + "Tiempo: " + ANSI_RESET + ANSI_GREEN + tiempoTexto + ANSI_RESET + "\n" + // ← NUEVA LÍNEA
                 "---------------------------------------------------"
             );
             System.out.println(
@@ -392,7 +405,8 @@ public class Serpiente {
         if (nombre.isEmpty()) {
             nombre = "Anónimo";
         }
-        guardarRecord(nombre, puntos, nivel);
+        long tiempoFinal = (System.currentTimeMillis() - inicio - tiempoPausado[0]) / 1000; // Tiempo total jugado en segundos
+        guardarRecord(nombre, puntos, nivel, formatoTiempo(tiempoFinal));
     }
 
     // Instrucciones del juego
@@ -433,28 +447,35 @@ public class Serpiente {
             if (!recordsFile.exists()) {
                 recordsFile.createNewFile();
             }
+
             BufferedReader reader = new BufferedReader(new FileReader(recordsFile));
             String linea;
             ArrayList<String[]> listaRecords = new ArrayList<>();
             boolean tieneRecords = false;
 
-            // Leer todos los records y extraer nombre, nivel y puntos
             while ((linea = reader.readLine()) != null) {
-                // Formato esperado: "Nombre ---> Nivel X (Y puntos)"
                 try {
                     String[] partes1 = linea.split("--->");
                     if (partes1.length == 2) {
                         String nombre = partes1[0].trim();
-
-                        // Extraer "Nivel X (Y puntos)"
                         String resto = partes1[1].trim();
+
+                        // Extraer nivel
                         String nivelStr = resto.substring(resto.indexOf("Nivel") + 6, resto.indexOf("(") - 1).trim();
-                        String puntosStr = resto.substring(resto.indexOf("(") + 1, resto.indexOf(" puntos)")).trim();
+
+                        // Contenido dentro de los paréntesis, ej: "15 puntos, 01:34"
+                        String dentroParentesis = resto.substring(resto.indexOf("(") + 1, resto.indexOf(")")).trim();
+
+                        // Dividimos por coma, por si incluye el tiempo
+                        String[] partes = dentroParentesis.split(",");
+                        String puntosStr = partes[0].replace("puntos", "").trim();
+
+                        String tiempoStr = (partes.length > 1) ? partes[1].trim() : "-";
 
                         int nivel = Integer.parseInt(nivelStr);
                         int puntos = Integer.parseInt(puntosStr);
 
-                        listaRecords.add(new String[]{nombre, String.valueOf(nivel), String.valueOf(puntos)});
+                        listaRecords.add(new String[]{nombre, String.valueOf(nivel), String.valueOf(puntos), tiempoStr});
                         tieneRecords = true;
                     }
                 } catch (Exception e) {
@@ -481,7 +502,7 @@ public class Serpiente {
                     "---------------------------------------------------"
                 );
             } else {
-                // Ordenar lista: primero por nivel, luego por puntos (ambos descendentes)
+                // Ordenar lista por nivel y puntos (descendentes)
                 Collections.sort(listaRecords, new Comparator<String[]>() {
                     @Override
                     public int compare(String[] r1, String[] r2) {
@@ -498,11 +519,12 @@ public class Serpiente {
 
                 int pos = 1;
                 for (String[] record : listaRecords) {
+                    String tiempoTexto = record[3].equals("-") ? "" : " ⏱️ " + record[3];
                     System.out.println(
                         "  " + ANSI_GREEN + String.format("%2d", pos++) + ". " + ANSI_RESET +
                         ANSI_YELLOW + record[0] + ANSI_RESET +
                         "  --->  Nivel " + ANSI_GREEN + record[1] + ANSI_RESET +
-                        " (" + ANSI_GREEN + record[2] + ANSI_RESET + " puntos)"
+                        " (" + ANSI_GREEN + record[2] + ANSI_RESET + " puntos)" + tiempoTexto
                     );
                 }
             }
@@ -568,7 +590,7 @@ public class Serpiente {
     }
    
     // Método para guardar el record en un archivo
-    public static void guardarRecord(String nombre, int puntos, int nivel) {
+    public static void guardarRecord(String nombre, int puntos, int nivel, String tiempo) {
         try {
             java.io.File recordsFile = new java.io.File("records/record.txt");
             java.io.File parent = recordsFile.getParentFile();
@@ -576,7 +598,7 @@ public class Serpiente {
                 parent.mkdirs();
             }
             BufferedWriter writer = new BufferedWriter(new FileWriter(recordsFile, true));
-            writer.write(nombre + " ---> Nivel " + nivel + " (" + puntos + " puntos)");
+            writer.write(nombre + " ---> Nivel " + nivel + " (" + puntos + " puntos, " + tiempo + ")");
             writer.newLine();
             writer.close();
         } catch (IOException e) {
@@ -652,5 +674,17 @@ public class Serpiente {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    // Método para formatear el tiempo en hh:mm:ss
+    public static String formatoTiempo(long segundos) {
+        long horas = segundos / 3600;
+        long minutos = (segundos % 3600) / 60;
+        long segs = segundos % 60;
+
+        if (horas > 0)
+            return String.format("%02d:%02d:%02d", horas, minutos, segs);
+        else
+            return String.format("%02d:%02d", minutos, segs);
     }
 }
