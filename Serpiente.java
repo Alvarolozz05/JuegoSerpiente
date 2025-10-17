@@ -115,6 +115,7 @@ public class Serpiente {
 
     // Método para mostrar el menú con la opción seleccionada
     public static void mostrarMenu(String[] opciones, int seleccionada) {
+        // Limpiar pantalla
         System.out.print("\033[H\033[2J");
         System.out.flush();
 
@@ -124,6 +125,7 @@ public class Serpiente {
             "---------------------------------------------------\n"
         );
 
+        // Mostrar opciones
         for (int i = 0; i < opciones.length; i++) {
             if (i == seleccionada) {
                 // Resaltar la opción seleccionada
@@ -147,7 +149,8 @@ public class Serpiente {
 
     // Juego de la serpiente
     public static void jugar() {
-        System.out.print("\033[?25l"); // Ocultar cursor
+        // Ocultar cursor
+        System.out.print("\033[?25l");
         System.out.flush();
 
         long inicio = System.currentTimeMillis(); // Momento en que empieza la partida
@@ -180,8 +183,8 @@ public class Serpiente {
         cuerpoColumna[0] = ANCHO / 2;
 
         // Comida inicial
-        int comidaFila = (int) (Math.random() * (ALTO - 2)) + 1;
-        int comidaCol = (int) (Math.random() * (ANCHO - 2)) + 1;
+        int comidaFila = (int) (Math.random() * (ALTO - 2)) + 1; // Le restamos 2 para que no se genere en ninguna pared
+        int comidaCol = (int) (Math.random() * (ANCHO - 2)) + 1; // Le restamos 2 para que no se genere en ninguna pared
         matriz[comidaFila][comidaCol] = comida;
 
         // Dirección inicial
@@ -203,15 +206,15 @@ public class Serpiente {
             public void keyPressed(java.awt.event.KeyEvent e) {
                 char tecla = Character.toUpperCase(e.getKeyChar());
                 // Cambiar dirección o salir
-                if ((tecla == 'W') || (tecla == 'A') || (tecla == 'S') || (tecla == 'D')) {
+                if ((tecla == 'W') || (tecla == 'A') || (tecla == 'S') || (tecla == 'D')) { // Movimiento
                     direccionHolder[0] = tecla;
-                } else if (tecla == 'Q') {
+                } else if (tecla == 'Q') { // Salir
                     jugando[0] = false;
-                } else if (tecla == 'P') {
+                } else if (tecla == 'P') { // Pausar/Continuar
                     enPausa[0] = !enPausa[0];
-                    if (enPausa[0]) {
+                    if (enPausa[0]) { // Si se acaba de pausar
                         pausaInicio[0] = System.currentTimeMillis();
-                    } else {
+                    } else { // Si se acaba de continuar
                         tiempoPausado[0] += (System.currentTimeMillis() - pausaInicio[0]);
                     }
                 }
@@ -235,6 +238,7 @@ public class Serpiente {
                     break;
             }
 
+            // Si está en pausa, mostrar mensaje y esperar
             if (enPausa[0]) {
                 System.out.print("\033[H\033[2J");
                 System.out.flush();
@@ -299,8 +303,8 @@ public class Serpiente {
                 longitud++;
                 // Nueva comida
                 do {
-                    comidaFila = (int) (Math.random() * (ALTO - 2)) + 1;
-                    comidaCol = (int) (Math.random() * (ANCHO - 2)) + 1;
+                    comidaFila = (int) (Math.random() * (ALTO - 2)) + 1; // Le restamos 2 para que no se genere en ninguna pared
+                    comidaCol = (int) (Math.random() * (ANCHO - 2)) + 1; // Le restamos 2 para que no se genere en ninguna pared
                 } while (!matriz[comidaFila][comidaCol].equals(" "));
             } else {
                 // Borrar cola
@@ -308,7 +312,7 @@ public class Serpiente {
             }
 
             // Subir de nivel automáticamente
-            if (puntos >= 5 && nivel == 0) {
+            if ((puntos >= 5) && (nivel == 0)) {
                 nivel++;
                 cambiarNivel(matriz, nivel, cuerpoFila, cuerpoColumna, longitud, comidaFila, comidaCol);
                 // Reiniciar serpiente
@@ -318,12 +322,14 @@ public class Serpiente {
             } else if (puntos >= 10 && nivel == 1) {
                 nivel++;
                 cambiarNivel(matriz, nivel, cuerpoFila, cuerpoColumna, longitud, comidaFila, comidaCol);
+                // Reiniciar serpiente
                 longitud = 1;
                 cuerpoFila[0] = ALTO / 2;
                 cuerpoColumna[0] = ANCHO / 2;
             } else if (puntos >= 20 && nivel == 2) {
                 nivel++;
                 cambiarNivel(matriz, nivel, cuerpoFila, cuerpoColumna, longitud, comidaFila, comidaCol);
+                // Reiniciar serpiente
                 longitud = 1;
                 cuerpoFila[0] = ALTO / 2;
                 cuerpoColumna[0] = ANCHO / 2;
@@ -347,8 +353,9 @@ public class Serpiente {
             System.out.print("\033[H\033[2J");
             System.out.flush();
             
+            // Calcular tiempo jugado
             long tiempoJugado = (System.currentTimeMillis() - inicio - tiempoPausado[0]) / 1000; // Tiempo jugado en segundos
-            String tiempoTexto = formatoTiempo(tiempoJugado);
+            String tiempoTexto = formatoTiempo(tiempoJugado); // Formatear tiempo a mm:ss o hh:mm:ss
 
             pintarTablero(matriz);
             System.out.println(
@@ -370,6 +377,7 @@ public class Serpiente {
                 "---------------------------------------------------"
             );
 
+            // Ajustar velocidad según puntos
             int velocidadBase = 200; // Velocidad base en ms
             int velocidadActual = Math.max(50, velocidadBase - (puntos * 10)); // Aumentar velocidad con puntos
 
@@ -397,20 +405,25 @@ public class Serpiente {
         );
         System.out.print("Nombre: ");
         String nombre;
+        // Leer nombre desde consola o Scanner según disponibilidad
         if (System.console() == null) {
             nombre = new java.util.Scanner(System.in).nextLine();
-        } else {
+        } else { // Consola disponible
             nombre = System.console().readLine();
         }
+        // Si el nombre está vacío, usar "Anónimo"
         if (nombre.isEmpty()) {
             nombre = "Anónimo";
         }
+
+        // Calcular tiempo final
         long tiempoFinal = (System.currentTimeMillis() - inicio - tiempoPausado[0]) / 1000; // Tiempo total jugado en segundos
         guardarRecord(nombre, puntos, nivel, formatoTiempo(tiempoFinal));
     }
 
     // Instrucciones del juego
     public static void verInstrucciones() {
+        // Limpiar pantalla
         System.out.print("\033[H\033[2J");
         System.out.flush();
 
@@ -444,6 +457,7 @@ public class Serpiente {
 
     // Ver records
     public static void verRecords() {
+        // Limpiar pantalla
         System.out.print("\033[H\033[2J");
         System.out.flush();
 
@@ -456,18 +470,25 @@ public class Serpiente {
         try {
             java.io.File recordsFile = new java.io.File("records/record.txt");
             java.io.File parent = recordsFile.getParentFile();
+
+            // Crear directorio y archivo si no existen
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
+
+            // Crear archivo si no existe
             if (!recordsFile.exists()) {
                 recordsFile.createNewFile();
             }
 
+
+            // Leer archivo de records
             BufferedReader reader = new BufferedReader(new FileReader(recordsFile));
             String linea;
             ArrayList<String[]> listaRecords = new ArrayList<>();
             boolean tieneRecords = false;
 
+            // Leer cada línea del archivo
             while ((linea = reader.readLine()) != null) {
                 try {
                     String[] partes1 = linea.split("--->");
@@ -485,6 +506,7 @@ public class Serpiente {
                         String[] partes = dentroParentesis.split(",");
                         String puntosStr = partes[0].replace("puntos", "").trim();
 
+                        // Extraer tiempo si existe
                         String tiempoStr;
                         if (partes.length > 1) {
                             tiempoStr = partes[1].trim();
@@ -530,6 +552,8 @@ public class Serpiente {
                         int nivel2 = Integer.parseInt(r2[1]);
                         int puntos1 = Integer.parseInt(r1[2]);
                         int puntos2 = Integer.parseInt(r2[2]);
+
+                        // Ordenar primero por nivel, luego por puntos
                         if (nivel2 != nivel1) {
                             return nivel2 - nivel1;
                         }
@@ -537,6 +561,7 @@ public class Serpiente {
                     }
                 });
 
+                // Mostrar records
                 int pos = 1;
                 for (int i = 0; i < listaRecords.size(); i++) {
                     String[] record = listaRecords.get(i);
@@ -571,9 +596,13 @@ public class Serpiente {
         try {
             java.io.File recordsFile = new java.io.File("records/record.txt");
             java.io.File parent = recordsFile.getParentFile();
+
+            // Crear directorio si no existe
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
+
+            // Sobrescribir archivo con contenido vacío
             BufferedWriter writer = new BufferedWriter(new FileWriter(recordsFile));
             writer.write(""); // Sobrescribir con una cadena vacía
             writer.close();
@@ -598,6 +627,7 @@ public class Serpiente {
 
     // Alternar sonido
     public static void alternarSonido() {
+        // Limpiar pantalla
         System.out.print("\033[H\033[2J");
         System.out.flush();
         
@@ -618,9 +648,13 @@ public class Serpiente {
         try {
             java.io.File recordsFile = new java.io.File("records/record.txt");
             java.io.File parent = recordsFile.getParentFile();
+
+            // Crear directorio si no existe
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
+
+            // Añadir record al archivo
             BufferedWriter writer = new BufferedWriter(new FileWriter(recordsFile, true));
             writer.write(nombre + " ---> Nivel " + nivel + " (" + puntos + " puntos, " + tiempo + ")");
             writer.newLine();
@@ -652,10 +686,12 @@ public class Serpiente {
         String archivoNivel = "niveles/nivel" + nivel + ".txt";
 
         try {
+            // Leer archivo de nivel
             BufferedReader reader = new BufferedReader(new FileReader(archivoNivel));
             String linea;
             int fila = 0;
 
+            // Cargar obstáculos en la matriz
             while ((linea = reader.readLine()) != null && fila < matriz.length) {
                 for (int col = 0; col < Math.min(linea.length(), matriz[0].length); col++) {
                     char c = linea.charAt(col);
@@ -686,8 +722,11 @@ public class Serpiente {
             }
         }
 
+        // Limpiar pantalla y mostrar mensaje de nivel
         System.out.print("\033[H\033[2J");
         System.out.flush();
+
+
         System.out.println(
             "---------------------------------------------------\n" +
             ANSI_YELLOW + "           🌟  ¡HAS AVANZADO AL NIVEL " + nivel + "!  🌟" + ANSI_RESET + "\n" +
@@ -706,10 +745,11 @@ public class Serpiente {
         long minutos = (segundos % 3600) / 60;
         long segs = segundos % 60;
 
-        if (horas > 0) {
+        // Devolver en formato hh:mm:ss o mm:ss según corresponda
+        if (horas > 0) { // Si hay horas, mostrar hh:mm:ss
             return String.format("%02d:%02d:%02d", horas, minutos, segs);
         }
-        else {
+        else { // Si no hay horas, mostrar mm:ss
             return String.format("%02d:%02d", minutos, segs);
         }
     }
