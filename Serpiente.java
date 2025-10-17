@@ -210,9 +210,9 @@ public class Serpiente {
                 } else if (tecla == 'P') {
                     enPausa[0] = !enPausa[0];
                     if (enPausa[0]) {
-                        pausaInicio[0] = System.currentTimeMillis(); // ✅ ahora sí puedes modificarla
+                        pausaInicio[0] = System.currentTimeMillis();
                     } else {
-                        tiempoPausado[0] += (System.currentTimeMillis() - pausaInicio[0]); // ✅ también esta
+                        tiempoPausado[0] += (System.currentTimeMillis() - pausaInicio[0]);
                     }
                 }
             }
@@ -267,7 +267,7 @@ public class Serpiente {
 
             // Comprobar si se muerde
             for (int i = 0; i < longitud; i++) {
-                if (cuerpoFila[i] == nuevaFila && cuerpoColumna[i] == nuevaCol) {
+                if ((cuerpoFila[i] == nuevaFila) && (cuerpoColumna[i] == nuevaCol)) {
                     System.out.println(
                         "---------------------------------------------------\n" +
                         ANSI_RED + "     💀  ¡TE HAS MORDIDO!  💀" + ANSI_RESET + "\n" +
@@ -418,11 +418,26 @@ public class Serpiente {
             "---------------------------------------------------\n" +
             "                🗒️  INSTRUCCIONES  🗒️              \n" +
             "---------------------------------------------------\n" +
-            "  - Usa las teclas " + ANSI_YELLOW + "W" + ANSI_RESET + ", " + ANSI_YELLOW + "A" + ANSI_RESET + ", " + ANSI_YELLOW + "S" + ANSI_RESET + ", " + ANSI_YELLOW + "D" + ANSI_RESET + " para mover la serpiente.\n" +
-            "  - Come la " + ANSI_RED + "*" + ANSI_RESET + " para ganar puntos y crecer.\n" +
-            "  - Evita chocar contra las paredes " + ANSI_GRAY + "#" + ANSI_RESET + ", obstáculos " + ANSI_GRAY + "▓" + ANSI_RESET + " o tu propio cuerpo.\n" +
-            "  - El juego termina si chocas o te muerdes.\n" +
-            "  - ¡Supera niveles y consigue la mejor puntuación!\n" +
+            "  " + ANSI_GREEN + "¡Bienvenido al clásico juego de la serpiente!" + ANSI_RESET + "\n" +
+            "---------------------------------------------------\n" +
+            "  " + ANSI_YELLOW + "CONTROLES:" + ANSI_RESET + "\n" +
+            "    " + ANSI_YELLOW + "W" + ANSI_RESET + "  ↑  Mover arriba\n" +
+            "    " + ANSI_YELLOW + "S" + ANSI_RESET + "  ↓  Mover abajo\n" +
+            "    " + ANSI_YELLOW + "A" + ANSI_RESET + "  ←  Mover izquierda\n" +
+            "    " + ANSI_YELLOW + "D" + ANSI_RESET + "  →  Mover derecha\n" +
+            "    " + ANSI_YELLOW + "P" + ANSI_RESET + "  Pausar/Continuar\n" +
+            "    " + ANSI_RED + "Q" + ANSI_RESET + "  Salir de la partida\n" +
+            "---------------------------------------------------\n" +
+            "  " + ANSI_YELLOW + "OBJETIVO:" + ANSI_RESET + "\n" +
+            "    - Come la " + ANSI_RED + "*" + ANSI_RESET + " para ganar puntos y crecer.\n" +
+            "    - Evita chocar contra las paredes " + ANSI_GRAY + "#" + ANSI_RESET + ",\n" +
+            "      obstáculos " + ANSI_GRAY + "▓" + ANSI_RESET + " o tu propio cuerpo " + ANSI_GREEN + "0" + ANSI_RESET + ".\n" +
+            "    - ¡Supera niveles y consigue la mejor puntuación!\n" +
+            "---------------------------------------------------\n" +
+            "  " + ANSI_YELLOW + "CONSEJOS:" + ANSI_RESET + "\n" +
+            "    - Piensa antes de moverte, ¡la velocidad aumenta!\n" +
+            "    - Cada 5, 10 y 20 puntos el nivel sube y aparecen nuevos retos.\n" +
+            "    - ¡Guarda tu nombre para entrar en el ranking de records!\n" +
             "---------------------------------------------------"
         );
     }
@@ -470,7 +485,12 @@ public class Serpiente {
                         String[] partes = dentroParentesis.split(",");
                         String puntosStr = partes[0].replace("puntos", "").trim();
 
-                        String tiempoStr = (partes.length > 1) ? partes[1].trim() : "-";
+                        String tiempoStr;
+                        if (partes.length > 1) {
+                            tiempoStr = partes[1].trim();
+                        } else {
+                            tiempoStr = "-";
+                        }
 
                         int nivel = Integer.parseInt(nivelStr);
                         int puntos = Integer.parseInt(puntosStr);
@@ -518,8 +538,12 @@ public class Serpiente {
                 });
 
                 int pos = 1;
-                for (String[] record : listaRecords) {
-                    String tiempoTexto = record[3].equals("-") ? "" : " ⏱️ " + record[3];
+                for (int i = 0; i < listaRecords.size(); i++) {
+                    String[] record = listaRecords.get(i);
+                    String tiempoTexto = "";
+                    if (!record[3].equals("-")) {
+                        tiempoTexto = " ⏱️ " + record[3];
+                    }
                     System.out.println(
                         "  " + ANSI_GREEN + String.format("%2d", pos++) + ". " + ANSI_RESET +
                         ANSI_YELLOW + record[0] + ANSI_RESET +
