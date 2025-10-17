@@ -489,7 +489,9 @@ public class Serpiente {
                         int nivel2 = Integer.parseInt(r2[1]);
                         int puntos1 = Integer.parseInt(r1[2]);
                         int puntos2 = Integer.parseInt(r2[2]);
-                        if (nivel2 != nivel1) return nivel2 - nivel1;
+                        if (nivel2 != nivel1) {
+                            return nivel2 - nivel1;
+                        }
                         return puntos2 - puntos1;
                     }
                 });
@@ -523,7 +525,9 @@ public class Serpiente {
         try {
             java.io.File recordsFile = new java.io.File("records/record.txt");
             java.io.File parent = recordsFile.getParentFile();
-            if (parent != null && !parent.exists()) parent.mkdirs();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
             BufferedWriter writer = new BufferedWriter(new FileWriter(recordsFile));
             writer.write(""); // Sobrescribir con una cadena vacía
             writer.close();
@@ -586,8 +590,7 @@ public class Serpiente {
     public static void pintarTablero(String matriz[][]) {
         for (int fila = 0; fila < matriz.length; fila++) {
             for (int columna = 0; columna < matriz[0].length; columna++) {
-                if ((fila == 0) || (fila == matriz.length - 1) || 
-                    (columna == 0) || (columna == matriz[0].length - 1)) {
+                if ((fila == 0) || (fila == matriz.length - 1) || (columna == 0) || (columna == matriz[0].length - 1)) {
                     System.out.print('#');
                 } else {
                     System.out.print(matriz[fila][columna]);
