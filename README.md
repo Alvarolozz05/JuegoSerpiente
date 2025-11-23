@@ -42,7 +42,7 @@ Este proyecto es una aplicación de Java estándar que **debe ejecutarse en una 
     ```bash
     cd /mtd/ruta/a/tu/proyecto/JuegoSerpiente
     ```
-    *(Ejemplo de tu entorno: `cd /mnt/c/Users/alvlo/OneDrive/Escritorio/2º\ DAW/Programacion/1º\ Trimestre/TEMA\ 3/Ejercicios/JuegoSerpiente`)*
+    *(Ejemplo de tu entorno: `cd /mnt/c/Users/alvlo/OneDrive/Escritorio/JuegoSerpiente`)*
 
 3. **Compila el Código:**
     Estando ya en la carpeta, ejecuta el compilador de Java:
